@@ -13,7 +13,7 @@
             UP, DOWN, LEFT, RIGHT, STAY, PING
         Obstruction - a dict-like object, subscriptable by a Move, used to inform a player of their surroundings
 
-        Position - a two-dimensional vector that supports mathematical operations, and l1 norm, which might be helpful.
+        Position - a two-dimensional vector that supports some binary operations, and l1 norm, which might be helpful.
 
         Game - A class responsible for placing the players within the maze, asking them to take their turn, and
                detecting end-of-game conditions.
@@ -25,6 +25,7 @@
 '''
 
 import random
+import unittest
 
 from abc import ABCMeta, abstractmethod
 from itertools import izip
@@ -444,3 +445,36 @@ def game_repeater(maze, goody0_cls, goody1_cls, baddy_cls, max_rounds=10000)    
     ''' A generator of instances of identical games '''
     while True:
         yield Game(maze, goody0_cls(), goody1_cls(), baddy_cls(), max_rounds=max_rounds)
+
+
+class PositionTest(unittest.TestCase):
+    ''' Test that the Position class is functioning as expected '''
+
+    def setUp(self):
+        ''' Define a couple of position objects to use in tests '''
+        self.pos1 = Position(5, 7)
+        self.pos2 = Position(-4, 9)
+
+    def test_addition(self):
+        self.assertEqual(self.pos1 + self.pos2, Position(1, 16))
+
+    def test_subtraction(self):
+        self.assertEqual(self.pos1 - self.pos2, Position(9, -2))
+
+    def test_negation(self):
+        self.assertEqual(-self.pos1, Position(-5, -7))
+
+    def test_equality(self):
+        self.assertTrue(self.pos1 == self.pos1)
+
+    def test_l1_norm(self):
+        self.assertTrue(self.pos1.l1_norm() == 12)
+        self.assertTrue(self.pos2.l1_norm() == 13)
+
+    def test_inequality(self):
+        self.assertTrue(self.pos1 != self.pos2)
+
+
+if __name__ == "__main__":
+    # Run the unittests in this script, with a nice level of output
+    unittest.main(verbosity=2)

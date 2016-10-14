@@ -60,7 +60,7 @@ def stats_example(total_games):
     print(dict(results))
 
 def gui_example():
-    ''' Opens a GUI, allowing a games to be stepped through or quickly played one after another '''
+    ''' Opens a GUI, allowing games to be stepped through or quickly played one after another '''
     app = QApplication.instance() or QApplication(sys.argv)
     gv = GameViewer()
     gv.show()
@@ -70,5 +70,5 @@ def gui_example():
 if __name__ == "__main__":
     # Uncomment whichever example you want to run
     text_example()
-    # stats_example(1000)
-    # gui_example()
+    #stats_example(1000)
+    #gui_example()
