@@ -6,14 +6,29 @@
 from collections import defaultdict
 
 from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QBrush, QColor, QPen
+from PyQt5.QtGui import QBrush, QColor, QPen, QPixmap
 from PyQt5.QtWidgets import (QFormLayout, QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                              QVBoxLayout, QWidget, QCheckBox)
 
-from maze import Game, Maze, Goody
+from maze import Game, Maze
 
 class GameViewer(QWidget):
     ''' The main game viewer GUI '''
+
+    # Define the colours used for drawing everything
+    wall_brush = QBrush(QColor("black"))
+    wall_pen = QPen(wall_brush, 0)
+
+    goody0_brush = QBrush(QColor("#00CC00"))
+    goody0_pen = QPen(goody0_brush, 0)
+
+    goody1_brush = QBrush(QColor("green"))
+    goody1_pen = QPen(goody1_brush, 0)
+
+    baddy_brush =  QBrush(QColor("red"))
+    baddy_pen = QPen(baddy_brush, 0)
+
+    ping_brush = QBrush(QColor("white"))
 
     def __init__(self):
         super(GameViewer, self).__init__()
@@ -54,6 +69,29 @@ class GameViewer(QWidget):
         stats_layout.addWidget(QLabel("Baddy:"))
         stats_layout.addWidget(self.baddy_wins_count)
 
+        legend_layout = QHBoxLayout()
+        pixmap = QPixmap(16, 16)
+        pixmap.fill(self.goody0_brush.color())
+        goody0_icon = QLabel()
+        goody0_icon.setPixmap(pixmap)
+        legend_layout.addWidget(goody0_icon)
+        self.goody0_name = QLabel()
+        legend_layout.addWidget(self.goody0_name)
+        legend_layout.addStretch(1)
+        pixmap.fill(self.goody1_brush.color())
+        goody1_icon = QLabel()
+        goody1_icon.setPixmap(pixmap)
+        legend_layout.addWidget(goody1_icon)
+        self.goody1_name = QLabel()
+        legend_layout.addWidget(self.goody1_name)
+        legend_layout.addStretch(1)
+        pixmap.fill(self.baddy_brush.color())
+        baddy_icon = QLabel()
+        baddy_icon.setPixmap(pixmap)
+        legend_layout.addWidget(baddy_icon)
+        self.baddy_name = QLabel()
+        legend_layout.addWidget(self.baddy_name)
+
         info_layout = QFormLayout()
         info_layout.addRow("Round:", self.round)
         info_layout.addRow("Status:", self.status)
@@ -66,6 +104,7 @@ class GameViewer(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.view)
+        layout.addLayout(legend_layout)
         layout.addLayout(info_layout)
         layout.addWidget(self.auto_start)
         layout.addLayout(buttons_layout)
@@ -92,44 +131,32 @@ class GameViewer(QWidget):
         self.scene.setSceneRect(-cell, -cell, (width + 2) * cell, (height + 2) * cell)
         self.view.fitInView(self.scene.sceneRect())
 
-        wall_brush = QBrush(QColor("black"))
-        wall_pen = QPen(wall_brush, 0)
-
-        goody_brush = QBrush(QColor("green"))
-        goody_pen = QPen(goody_brush, 0)
-
-        baddy_brush =  QBrush(QColor("red"))
-        baddy_pen = QPen(baddy_brush, 0)
-
-        ping_brush = QBrush(QColor("white"))
-
         # Create the border
-        self.scene.addRect(-cell, -cell, (width + 2) * cell, cell, pen=wall_pen, brush=wall_brush)
-        self.scene.addRect(-cell, height * cell, (width + 2) * cell, cell, pen=wall_pen, brush=wall_brush)
-        self.scene.addRect(-cell, 0, cell, height * cell, pen=wall_pen, brush=wall_brush)
-        self.scene.addRect(width * cell, 0, cell, height * cell, pen=wall_pen, brush=wall_brush)
+        self.scene.addRect(-cell, -cell, (width + 2) * cell, cell, pen=self.wall_pen, brush=self.wall_brush)
+        self.scene.addRect(-cell, height * cell, (width + 2) * cell, cell, pen=self.wall_pen, brush=self.wall_brush)
+        self.scene.addRect(-cell, 0, cell, height * cell, pen=self.wall_pen, brush=self.wall_brush)
+        self.scene.addRect(width * cell, 0, cell, height * cell, pen=self.wall_pen, brush=self.wall_brush)
 
         # Add the obstructions:
         for y in xrange(width):
             for x in xrange(height):
                 if game.maze[x, y] == Maze.wall:
-                    self.scene.addRect(x * cell, y * cell, cell, cell, pen=wall_pen, brush=wall_brush)
+                    self.scene.addRect(x * cell, y * cell, cell, cell, pen=self.wall_pen, brush=self.wall_brush)
 
         # Add the players
         goody0_pos = game.position[game.goody0]
         goody1_pos = game.position[game.goody1]
         baddy_pos = game.position[game.baddy]
-        self.goody0 = self.scene.addEllipse(0, 0, cell, cell, pen=goody_pen, brush=goody_brush)
+        self.goody0 = self.scene.addEllipse(0, 0, cell, cell, pen=self.goody0_pen, brush=self.goody0_brush)
         self.goody0.setPos(goody0_pos.x * cell, goody0_pos.y * cell)
-        self.goody1 = self.scene.addEllipse(0, 0, cell, cell, pen=goody_pen, brush=goody_brush)
+        self.goody1 = self.scene.addEllipse(0, 0, cell, cell, pen=self.goody1_pen, brush=self.goody1_brush)
         self.goody1.setPos(goody1_pos.x * cell, goody1_pos.y * cell)
-        self.baddy = self.scene.addEllipse(0, 0, cell, cell, pen=baddy_pen, brush=baddy_brush)
+        self.baddy = self.scene.addEllipse(0, 0, cell, cell, pen=self.baddy_pen, brush=self.baddy_brush)
         self.baddy.setPos(baddy_pos.x * cell, baddy_pos.y * cell)
 
         # Add the ping markers
-        for player in (game.goody0, game.goody1, game.baddy):
-            pen = goody_pen if isinstance(player, Goody) else baddy_pen
-            marker = self.scene.addEllipse(cell // 4, cell // 4, cell // 2, cell // 2, pen=pen, brush=ping_brush)
+        for player, pen in ((game.goody0, self.goody0_pen), (game.goody1, self.goody1_pen), (game.baddy, self.baddy_pen)):
+            marker = self.scene.addEllipse(cell // 4, cell // 4, cell // 2, cell // 2, pen=pen, brush=self.ping_brush)
             marker.hide()
             marker.setZValue(-1)
             self.ping_marker[player] = marker
@@ -138,6 +165,11 @@ class GameViewer(QWidget):
         self.round.setText(str(game.round))
         self.status.setText(game.status)
         self.running = False
+
+        # Update the legend
+        self.goody0_name.setText(type(game.goody0).__name__)
+        self.goody1_name.setText(type(game.goody1).__name__)
+        self.baddy_name.setText(type(game.baddy).__name__)
 
         # Change the window title
         self.setWindowTitle("{} and {} vs. {}".format(type(game.goody0).__name__, type(game.goody1).__name__,
