@@ -67,6 +67,6 @@ def gui_example():
 
 if __name__ == "__main__":
     # Uncomment whichever example you want to run
-    #text_example()
-    # stats_example(1000)
-    gui_example()
+    text_example()
+    #stats_example(1000)
+    #gui_example()
