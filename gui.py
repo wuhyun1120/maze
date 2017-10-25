@@ -118,7 +118,7 @@ class GameViewer(QWidget):
 
         # Alter the GUI widgets
         self.game = game
-        self.scene = QGraphicsScene()
+        self.scene = QGraphicsScene(self)
         self.view.setScene(self.scene)
         self.go_stop_button.setEnabled(True)
         self.step_button.setEnabled(True)
@@ -138,8 +138,8 @@ class GameViewer(QWidget):
         self.scene.addRect(width * cell, 0, cell, height * cell, pen=self.wall_pen, brush=self.wall_brush)
 
         # Add the obstructions:
-        for y in xrange(width):
-            for x in xrange(height):
+        for y in range(width):
+            for x in range(height):
                 if game.maze[x, y] == Maze.wall:
                     self.scene.addRect(x * cell, y * cell, cell, cell, pen=self.wall_pen, brush=self.wall_brush)
 

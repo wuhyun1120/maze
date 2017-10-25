@@ -28,14 +28,14 @@ import random
 import unittest
 
 from abc import ABCMeta, abstractmethod
-from itertools import izip
+
 
 class Move(object):
     ''' An instruction returned by goodies and baddies.
         'name' is the human-readable name
     '''
     def __init__(self, name):
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError("'name' must be a string, got: {}".format(name))
         self.name = name
 
@@ -141,10 +141,8 @@ class Obstruction(object):
                           "." +            _cell_str(self[DOWN])       + "."])
 
 
-class Player(object):
+class Player(object, metaclass=ABCMeta):
     ''' Common base class for goodies and baddies '''
-
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def take_turn(self, obstruction, ping_response):
@@ -213,7 +211,7 @@ class Maze(object):
         self.width = width
         self.height = height
         if data is not None:
-            if not isinstance(data, basestring):
+            if not isinstance(data, str):
                 raise TypeError("'data' must be a string, got: {}".format(data))
             if len(data) != width * height:
                 raise ValueError("'data' must be a string of length {}, but it has length {}".format(
@@ -222,11 +220,11 @@ class Maze(object):
                           # Arranging the rows in this way makes it easier to print the maze
 
         # Initialise self._cells - either as a blank maze, or from the input data
-        for y in xrange(self.height):
+        for y in range(self.height):
             if data is None:
                 row = [Maze.space] * self.width
             else:
-                row = map(int, data[y * self.width:(y + 1) * self.width])
+                row = list(map(int, data[y * self.width:(y + 1) * self.width]))
             self._cells.append(row)
         self._cells.reverse()
 
@@ -290,8 +288,8 @@ class Maze(object):
             raise TypeError("Can only multiple a maze by an (x, y) tuple, got:{}".format(other))
         x_repeats, y_repeats = other
         new_cells = []
-        for _ in xrange(y_repeats):
-            for y in xrange(self.height):
+        for _ in range(y_repeats):
+            for y in range(self.height):
                 new_cells.append(self._cells[y] * x_repeats)
         new_maze = Maze(self.width * x_repeats, self.height * y_repeats)
         new_maze._cells = new_cells
@@ -335,7 +333,7 @@ class Game(object):
         taken = []
         max_attempts = 1000  # Just to avoid an infinite loop. We expect to place a player much sooner than this!
         for player in self.players:
-            for _ in xrange(max_attempts):
+            for _ in range(max_attempts):
                 new_position = Position(random.randint(0, self.maze.width - 1), random.randint(0, self.maze.height - 1))
                 if new_position not in taken and self.maze[new_position] == Maze.space:
                     taken.append(new_position)
@@ -420,11 +418,11 @@ class Game(object):
 
     def __str__(self):
         ''' Pretty-printable version of the current state of the game '''
-        maze_cells = [bytearray(row) for row in reversed(str(self.maze).splitlines())]
-        maze_cells[self.position[self.goody0].y + 1][self.position[self.goody0].x + 1] = "G"
-        maze_cells[self.position[self.goody1].y + 1][self.position[self.goody1].x + 1] = "G"
-        maze_cells[self.position[self.baddy].y + 1][self.position[self.baddy].x + 1] = "B"
-        maze = "\n".join(str(row) for row in reversed(maze_cells))
+        maze_cells = [bytearray(row.encode("ascii")) for row in reversed(str(self.maze).splitlines())]
+        maze_cells[self.position[self.goody0].y + 1][self.position[self.goody0].x + 1] = ord("G")
+        maze_cells[self.position[self.goody1].y + 1][self.position[self.goody1].x + 1] = ord("G")
+        maze_cells[self.position[self.baddy].y + 1][self.position[self.baddy].x + 1] = ord("B")
+        maze = "\n".join(str(row.decode("ascii")) for row in reversed(maze_cells))
         parts = [maze,
                  "Status: " + self.status,
                  "Round: " + str(self.round),
@@ -438,7 +436,7 @@ def game_generator(mazes, goody0s, goody1s, baddies, max_rounds=10000):
     ''' A generator that yields Games.
         Provide it with iterables of mazes, goodies (for goody 0 and 1), and baddies
     '''
-    for maze, goody0, goody1, baddy in izip(mazes, goody0s, goody1s, baddies):
+    for maze, goody0, goody1, baddy in zip(mazes, goody0s, goody1s, baddies):
         yield Game(maze, goody0, goody1, baddy, max_rounds=max_rounds)
 
 def game_repeater(maze, goody0_cls, goody1_cls, baddy_cls, max_rounds=10000)        :

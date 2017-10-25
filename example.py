@@ -4,8 +4,6 @@
     Some examples of creating mazes, running games, collecting statistics, and opening the GUI.
 '''
 
-from __future__ import print_function
-
 import sys
 import time
 
