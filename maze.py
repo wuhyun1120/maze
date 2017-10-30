@@ -27,7 +27,7 @@
 import random
 import unittest
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 
 class Move(object):
@@ -141,7 +141,7 @@ class Obstruction(object):
                           "." +            _cell_str(self[DOWN])       + "."])
 
 
-class Player(object, metaclass=ABCMeta):
+class Player(ABC):
     ''' Common base class for goodies and baddies '''
 
     @abstractmethod
