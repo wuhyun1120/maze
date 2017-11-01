@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QApplication
 
 from maze import Maze, Game, game_repeater
 from goodies import RandomGoody
+from goodies import TPWGoody
 from baddies import RandomBaddy
 from gui import GameViewer
 
@@ -47,7 +48,7 @@ def stats_example(total_games):
     ''' Plays many games, printing cumulative and final stats '''
 
     results = defaultdict(int)
-    for game_number, game in enumerate(game_repeater(EXAMPLE_MAZE, RandomGoody, RandomGoody, RandomBaddy)):
+    for game_number, game in enumerate(game_repeater(EXAMPLE_MAZE, TPWGoody, TPWGoody, RandomBaddy)):
         if game_number == total_games:
             break
         result, _rounds = game.play()
@@ -62,11 +63,11 @@ def gui_example():
     app = QApplication.instance() or QApplication(sys.argv)
     gv = GameViewer()
     gv.show()
-    gv.set_game_generator(game_repeater(EXAMPLE_MAZE * (3, 3), RandomGoody, RandomGoody, RandomBaddy))
+    gv.set_game_generator(game_repeater(EXAMPLE_MAZE * (3, 3), TPWGoody, TPWGoody, RandomBaddy))
     app.exec_()
 
 if __name__ == "__main__":
     # Uncomment whichever example you want to run
-    text_example()
-    #stats_example(1000)
-    #gui_example()
+    #text_example()
+    #stats_example(10000)
+    gui_example()

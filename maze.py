@@ -10,7 +10,7 @@
                particular positions in the maze
 
         Move - a small class whose instances represent the different moves that a player can take
-            UP, DOWN, LEFT, RIGHT, STAY, PING
+            UP, DOWN, LEFT, RIGHT, STAY, 
         Obstruction - a dict-like object, subscriptable by a Move, used to inform a player of their surroundings
 
         Position - a two-dimensional vector that supports some binary operations, and l1 norm, which might be helpful.
