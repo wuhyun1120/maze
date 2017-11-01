@@ -62,7 +62,7 @@ class TPWGoody(Goody):
         if len(adjacent_walls) <= 1:
             self.is_stuck = False
         # Identify dead ends as walls
-        elif len(adjacent_walls) == 3:
+        if len(adjacent_walls) == 3:
             self.known_walls.append(self.position)
         # See if it's stuck at a left down corner. If yes, change into the 'stuck' mode
         if DOWN not in allowed and LEFT not in allowed:
@@ -71,11 +71,21 @@ class TPWGoody(Goody):
         if self.is_stuck:
             move = self.stuck_choice(allowed)
         else:
-            move = self.normal_choice(allowed)
+            if len(adjacent_walls) <= 1:
+                # If it just got free from being stuck, make an even choice.
+                move = self.even_choice(allowed)
+            else:
+                move = self.normal_choice(allowed)
 
         # Save the move and update the new position
         self.last_move = move
         self.position = self.position + STEP[move]
+        return move
+    
+    def even_choice(self, allowed):
+        ''' A even move choice at the junction. Unbiased'''
+        possibilities = [direction for direction in [UP, DOWN, LEFT, RIGHT] if direction in allowed]
+        move = random.choice(possibilities)
         return move
 
     def normal_choice(self, allowed):
